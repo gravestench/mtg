@@ -28,7 +28,7 @@ func main() {
 	fmt.Printf("Effects: %v\r\n", c.State.Effects.Names())
 	fmt.Printf("Converted Mana Cost: %v\r\n", c.ConvertedManaCost())
 
-	template, err := loadPngFromBytes(card_templates.Blue)
+	template, err := loadPngFromBytes(card_templates.Red)
 	if err != nil {
 		panic(fmt.Errorf("loading image: %v", err))
 	}
@@ -47,8 +47,8 @@ func main() {
 	rl.InitWindow(width, height, "MTG")
 
 	img := rl.NewImageFromImage(c.CompositeCardImage())
-	imgRectangle := rl.NewRectangle(0, 0, float32(img.Width), float32(img.Height))
-	scaledRectangle := rl.NewRectangle(0, 0, float32(img.Width/2), float32(img.Height/2))
+	srcRect := rl.NewRectangle(0, 0, float32(img.Width), float32(img.Height))
+	dstRect := rl.NewRectangle(float32(img.Width/4), float32(img.Height/4), float32(img.Width/2), float32(img.Height/2))
 	texture := rl.LoadTextureFromImage(img)
 
 	var r float32
@@ -57,7 +57,7 @@ func main() {
 		r = float32(math.Sin(float64(time.Now().UnixNano())/500000000.0) * 1)
 		rl.BeginDrawing()
 		rl.ClearBackground(color.RGBA{0, 0, 0, 255})
-		rl.DrawTexturePro(texture, imgRectangle, scaledRectangle, rl.Vector2{X: 0.5, Y: 0.5}, r, color.RGBA{255, 255, 255, 255})
+		rl.DrawTexturePro(texture, srcRect, dstRect, rl.Vector2{X: dstRect.Width / 2, Y: dstRect.Height / 2}, r, color.RGBA{255, 255, 255, 255})
 		rl.EndDrawing()
 	}
 }
