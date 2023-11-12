@@ -67,24 +67,40 @@ func (s *bootstrap) Init(r runtime.R) {
 		return
 	}
 
+	// zoom out instead of adjusting all of the card dimensions
 	camera := s.renderer.GetDefaultCamera()
 	camera.Zoom = 0.25
 
-	grid := 5
-	pad := 0.05
+	const (
+		gridWidth             = 5
+		gridCellPadNormalized = 0.05
+	)
 
-	var ox, oy int
+	var gridOriginX, gridOriginY int
 	for idx, img := range images {
-		ox = img.Bounds().Dx()
-		oy = img.Bounds().Dy() / 2
-		padX, padY := float64(img.Bounds().Dx())*pad, float64(img.Bounds().Dy())*pad
-		gx := idx % grid
-		gy := idx / grid
-		x, y := int(padX)+ox+gx*img.Bounds().Dx(), int(padY)+oy+gy*img.Bounds().Dy()
+		// offset of grid, we only need to set this once,
+		// but all the card dimensions are the same
+		gridOriginX, gridOriginY = img.Bounds().Dx(), img.Bounds().Dy()/2
+
+		// padding between the cards, relative to the card dimensions
+		padX := float64(img.Bounds().Dx()) * gridCellPadNormalized
+		padY := float64(img.Bounds().Dy()) * gridCellPadNormalized
+
+		// grid cell x,y index, based off of card index
+		cellX, cellY := idx%gridWidth, idx/gridWidth
+
+		// actual x,y position of the card, based off of the grid origin,
+		// padding, and dimensions of the card
+		x, y := int(padX)+gridOriginX+cellX*img.Bounds().Dx(), int(padY)+gridOriginY+cellY*img.Bounds().Dy()
+
+		// create our renderable object and set its properties
 		node := s.renderer.NewRenderable()
 		node.SetImage(img)
 		node.SetPosition(float32(x), float32(y))
-		node.SetRotation(float32(rand.Intn(6000)-3000) / 1000)
+
+		// animate the rotation, with a random starting phase for each card,
+		// and set up an OnUpdate callback which applies new rotation based on
+		// the current timestamp
 		phase := (rand.Float64() * 2) - 1
 		node.OnUpdate(func() {
 			rotation := float32(math.Sin((float64(time.Now().UnixNano()) / 250000000.0) + phase))
