@@ -6,9 +6,9 @@ import (
 	"github.com/gravestench/mtg/pkg/services/configFile"
 )
 
-type Dependency = ScryfallClient
+type Dependency = TappedoutClient
 
-type ScryfallClient interface {
+type TappedoutClient interface {
 	runtime.Service
 	runtime.HasLogger
 	runtime.HasDependencies
